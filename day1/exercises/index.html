@@ -11,7 +11,7 @@
   <!--
   -->
   <script type="text/javascript" src="nix-instantiate.js"></script>
-  <script type="text/javascript" src="markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script type="text/javascript" src="FileSaver.min.js"></script>
   <title>A tour of Nix</title>
 
@@ -35,7 +35,7 @@ var editingQuestionText = false;
 var saveQuestions = function() {
   // http://stackoverflow.com/questions/7486085/copying-array-by-value-in-javascript
   var t = JSON.parse(JSON.stringify(questions));
-    
+
   for (i = 0; i < t.length; i++) {
     t[i].code = t[i].mycode;
     t[i].solution = t[i].mysolution;
@@ -51,7 +51,7 @@ var saveQuestions = function() {
 
   var questionsJSON = JSON.stringify(t, null, 4)
   var blob = new Blob([questionsJSON], {type: "text/plain;"});
-  
+
   saveAs(blob, "questions.json");
 }
 
@@ -78,9 +78,9 @@ function load_wanted_page() {
     //console.log("parser of getURLParameter found: " + getURLParameter("id"))
     //console.log("parser of getURLParameter found: " + i)
     if (!isNaN(i)) {
-      change_question(i-1) 
+      change_question(i-1)
     } else {
-      change_question(0) 
+      change_question(0)
     }
 }
 //loads the questions.json from the webpage
@@ -112,33 +112,33 @@ function keysPressed(e) {
   keys[e.keyCode] = true;
   if (keys[16] && keys[13]) { // shift+return
     runNix()
-      e.preventDefault(); 
+      e.preventDefault();
   }
   if (keys[17] && keys[74]) { // ctrl+ k
     console.log("change_question(1);");
     change_question(1);
-    e.preventDefault(); 
+    e.preventDefault();
   }
   if (keys[17] && keys[75]) { // ctrl+.j
     console.log("change_question(-1);");
     change_question(-1);
-    e.preventDefault(); 
+    e.preventDefault();
   }
   if (keys[17] && keys[190]) { // ctrl+.
     markdown2html();
-    e.preventDefault(); 
+    e.preventDefault();
   }
   if (keys[17] && keys[188]) { // ctrl+,
     load_markdown();
-    e.preventDefault(); 
+    e.preventDefault();
   }
   if (keys[17] && keys[73]) { // ctrl+i
     resetQuestion();
-    e.preventDefault(); 
+    e.preventDefault();
   }
   if (keys[17] && keys[83]) { // ctrl+i
     saveQuestions();
-    e.preventDefault(); 
+    e.preventDefault();
   }
 }
 function keysReleased(e) {
@@ -164,7 +164,7 @@ var change_question = function(myinput) {
 // update current question and NOT modifying the window.history
 var change_question_withoutHistoryChange = function (myinput) {
   // save old state
-  if (editingQuestionText == true) 
+  if (editingQuestionText == true)
     alert("editor must be closed before opening a different question, now everything is corrupted -> reload and start over. sorry (qknight)")
   var output = document.getElementById('output');
 
@@ -178,7 +178,7 @@ var change_question_withoutHistoryChange = function (myinput) {
   }
 
   initialized=1;
-  current_question += myinput; 
+  current_question += myinput;
   output.style.backgroundColor = "grey";
 
   if (current_question < 0)
@@ -199,7 +199,7 @@ var change_question_withoutHistoryChange = function (myinput) {
   contentTitle.innerHTML = String(current_question + 1 + "<font size=\"3%\"> / " + questions.length + "</font>" + " - " + topic);
 
   var paypal='<p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"> <input type="hidden" name="cmd" value="_donations"> <input type="hidden" name="business" value="js@lastlog.de"> <input type="hidden" name="lc" value="DE"> <input type="hidden" name="item_name" value="Help Paul and Joachim in making a tour of nix better!"> <input type="hidden" name="no_note" value="0"> <input type="hidden" name="currency_code" value="EUR"> <input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_SM.gif:NonHostedGuest"> <input type="image" src="paypal.gif" border="0" name="submit" alt="Jetzt einfach, schnell und sicher online bezahlen – mit PayPal."> </form></p>'
-  var text = markdown.toHTML(question);
+  var text = marked.parse(question);
   contentText.innerHTML = text.replace("??PAYPAL??", paypal);
 
     var links = document.links;
@@ -207,7 +207,7 @@ var change_question_withoutHistoryChange = function (myinput) {
    for (var i = 0, linksLength = links.length; i < linksLength; i++) { //>
      if (links[i].hostname != window.location.hostname) {
        links[i].target = '_blank';
-     } 
+     }
    }
 
 
@@ -235,7 +235,7 @@ flipStylesheet = function() {
 
 var showSolution = function() {
   var s = document.getElementById('solution');
-  
+
   if (s.style.display == "none") {
     s.style.display = "flex";
     auto_resize(s);
@@ -247,7 +247,7 @@ var resetQuestion = function() {
   editor.setValue(questions[selected_question].code);
   var s = document.getElementById('solution');
   s.value = questions[selected_question].solution;
-  
+
   var output = document.getElementById('output');
   output.style.backgroundColor = "grey";
   console.log("reset question")
@@ -266,7 +266,7 @@ var markdown2html = function() {
     } else {
 // console.log("6.1")
       // changes were detected, so we just update the preview
-      var p = markdown.toHTML(text);
+      var p = marked.parse(text);
 // console.log("6.2")
       contentText.innerHTML = p;
 // console.log("6.3")
@@ -294,11 +294,11 @@ var runNix = function() {
 //  Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
 
   // run the solution
-  
+
   var correct_solution;
-  
+
   Module['print'] = function(text) {
-//    Module['return'] = text + '\n'; 
+//    Module['return'] = text + '\n';
     correct_solution = text;
     var end = new Date().getTime();
     var time = end - start;
@@ -307,7 +307,7 @@ var runNix = function() {
   };
   Module['printErr'] = function(text) {
   //this should not happen
-  //TODO exception handling 
+  //TODO exception handling
   };
   var solution_text = questions[current_question].solution;
   FS.writeFile('/test.nix', solution_text, {encoding: 'utf8'});
@@ -315,13 +315,13 @@ var runNix = function() {
   //console.log(result);
 //  Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
   Module.callMain(Module['arguments']);
-  
+
   //run the user input
   console.log("running runNix()");
   document.getElementById('runInfo').innerHTML = "computation in progress";
   document.getElementById('output').value = "";
   Module['print'] = function(text) {
-//    Module['return'] = text + '\n'; 
+//    Module['return'] = text + '\n';
     var o = document.getElementById('output');
     if (text == correct_solution){
       console.log("correct answer");
@@ -332,11 +332,11 @@ var runNix = function() {
       console.log("incorrect answer");
       o.value = "your solution:\n" + text + "\nexpected was:\n" + correct_solution;
       o.style.backgroundColor = "#aa4444";
-  //    setTimeout(function () {o.style.backgroundColor = "grey"}, 2000); 
+  //    setTimeout(function () {o.style.backgroundColor = "grey"}, 2000);
     }
     auto_resize(o);
     document.getElementById('runInfo').innerHTML = "";
-        
+
   };
   Module['printErr'] = function(text) {
     text = text.replace("[31;1m", "");
@@ -351,12 +351,12 @@ var runNix = function() {
     text = text.replace(//g, "");
 //    text = text.replace(":error:", ":\nerror");
     console.log(text);
-//    Module['return'] = text + '\n'; 
+//    Module['return'] = text + '\n';
     document.getElementById('runInfo').innerHTML = "";
     var o = document.getElementById('output')
     o.value += text +"\n";
     auto_resize(o)
-    
+
     console.log("incorrect answer");
 //    o.value += text;
     o.style.backgroundColor = "#aa4444";
@@ -368,7 +368,7 @@ var runNix = function() {
   //var result = FS.readFile('test.nix', {encoding: 'utf8'});
   //console.log(result);
   Module.callMain(Module['arguments']);
-};   	    
+};
 
   </script>
 </head>
@@ -419,8 +419,8 @@ var runNix = function() {
       lineNumbers: true,
       viewportMargin: Infinity,
     });
-    document.getElementById('testJS').innerHTML = "works! Maybe wait a little longer as this webpage is rather big with 27Mib!";  
- 
+    document.getElementById('testJS').innerHTML = "works! Maybe wait a little longer as this webpage is rather big with 27Mib!";
+
  </script>
 </body>
 </html>
