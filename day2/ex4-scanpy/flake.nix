@@ -34,5 +34,6 @@
       bionix' = import bionix {nixpkgs = pkgs;};
     in {
       defaultPackage = bionix'.callBionix ./. {mach-nix = mach-nix.lib."${system}";};
+      packages.solution = bionix'.callBionix ./solution.nix {mach-nix = mach-nix.lib."${system}";};
     });
 }
