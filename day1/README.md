@@ -1,32 +1,30 @@
 # Day 1 - BioNix Workshop
 
-Let's start by defining *computational reproducibility* as always
-obtaining the same output from a computation given the same inputs. In
-other words, computational reproducibility is about making computations
-*deterministic*.  In the research context, this is important as
-reproducibility allows others (and ourselves) to verify and build upon
-what we have done in future.
+Let's start by defining *computational reproducibility* as always obtaining the
+same output from a computation given the same inputs. In other words,
+computational reproducibility is about making computations deterministic*. In
+the research context, this is important as reproducibility allows others (and
+ourselves) to verify and build upon what we have done in future.
 
 # A functional view of things and why Nix is needed
 
-What makes reproducibility difficult is the management of *state*, or
-the context within with a computation takes place. State manipulation is
-widespread:  how many apps updates or system updates do you recall
-automatically being installed over the past year?  Do you think your
-analysis today will be the same in one years time if your software stack
-has changed?
+What makes reproducibility difficult is the management of *state*, or the
+context within with a computation takes place. State manipulation is widespread:
+how many apps updates or system updates do you recall automatically being
+installed over the past year? Do you think your analysis today will be the same
+in one years time if your software stack has changed?
 
 One way to deal with this problem is to make computations *pure* by forbidding
-the use of anything that is not explicitly stated as an input. This is
-the same idea of pure functional programming, only at the higher level of
-executing software.
+the use of anything that is not explicitly stated as an input. This is the same
+idea of pure functional programming, only at the higher level of executing
+software.
 
 Nix effectively enforces purity for software execution by ensuring the software
 cannot access anything outside of the specified inputs. By this way, it can
 guarantee a very high degree of reproducibility. Nix is a general build engine
 most commonly used for building software today, but as we will see a bit later
-it can also execute computational biology workflows in a pure manner with a small
-library called BioNix.
+it can also execute computational biology workflows in a pure manner with a
+small library called BioNix.
 
 # Pipelines in BioNix
 
@@ -58,10 +56,10 @@ platypus.call { } (map preprocess inputs)
 
 # Nix the language
 
-We will start with learning Nix the langauge, which is used for
-specifying workflows. If you are familar with JSON, it is very similar
-in terms of availble data types but has one very important addition:
-functions. Let's cover the basic data types and their syntax:
+We will start with learning Nix the language, which is used for specifying
+workflows. If you are familiar with JSON, it is very similar in terms of
+available data types but has one very important addition: functions. Let's cover
+the basic data types and their syntax:
 
 - Booleans: `true` and `false`
 - Strings: `"this is a string"`
@@ -86,8 +84,7 @@ Some common operators:
 
 # About this interface
 
-This workshop uses [A tour of
-nix](https://github.com/nixcloud/tour_of_nix) with some altered content
-for the purposes of learning enough of Nix the language to write
-workflows in BioNix during the second part. Click next to continue to
-the exercises.
+This workshop uses [A tour of nix](https://github.com/nixcloud/tour_of_nix) with
+some altered content for the purposes of learning enough of Nix the language to
+write workflows in BioNix during the second part. Click next to continue to the
+exercises.
