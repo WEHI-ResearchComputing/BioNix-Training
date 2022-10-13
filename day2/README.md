@@ -81,3 +81,18 @@ How this works is beyond the scope of this workshop, however you can take a look
 at one of the `flake.nix` to see how inputs are defined followed by outputs (our
 workshop exercises) based on the inputs. The `flake.lock` is automatically
 created by Nix and pins the versions of all the inputs precisely.
+
+## Where to get help
+
+There are several avenues of support available for Nix, nixpkgs, and BioNix. The
+official channels are listed [on the main website](https://nixos.org/learn.html).
+There you will find many guides about how to setup ad-hoc environments, or more
+reproducible environments, as well as documentation for Nix, nixpkgs, and NixOS,
+an operating system built on Nix.
+
+There are several Matrix chat rooms for support. For general Nix or nixpkgs
+questions use the [#nix:nixos.org](https://matrix.to/#/#nix:nixos.org) room. For
+BioNix specific questions there's [#bionix:nixos.org](https://matrix.to/#/#bionix:nixos.org).
+
+Finally there's a [discourse forum](https://discourse.nixos.org/) available for
+Nix/nixpkgs questions.
