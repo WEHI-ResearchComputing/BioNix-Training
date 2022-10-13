@@ -61,7 +61,8 @@ which will provide a shell containing both SPAdes and quast.
 ## Working through the exercises
 
 To work through the exercises, change into the directory and read the comment at
-the top of `default.nix`. The exercise can be built with
+the top of `default.nix`. Except for the first exercise on declarative shells,
+the exercises can be built with
 
     nix build
 
