@@ -12,7 +12,15 @@
     flake-utils,
   }:
     flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs {inherit system;};
+      pkgs = import nixpkgs {
+        inherit system;
+        config.rPackageOverrides = self:
+          with self; {
+            edgeR = (import nixpkgs {inherit system;}).rPackages.edgeR.overrideAttrs (attrs: {
+              buildInputs = attrs.buildInputs ++ lib.optional stdenv.isDarwin libiconv;
+            });
+          };
+      };
       bionix' = import bionix {nixpkgs = pkgs;};
     in {
       defaultPackage = bionix'.callBionix ./. {};
