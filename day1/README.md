@@ -2,7 +2,7 @@
 
 Let's start by defining *computational reproducibility* as always obtaining the
 same output from a computation given the same inputs. In other words,
-computational reproducibility is about making computations deterministic*. In
+computational reproducibility is about making computations *deterministic*. In
 the research context, this is important as reproducibility allows others (and
 ourselves) to verify and build upon what we have done in future.
 
@@ -73,7 +73,7 @@ the basic data types and their syntax:
 - File paths: `/path/to/file`
 
 Some common operators:
-- Boolean conjunctions and disjunctions: `true || false #=> true` `true && false #=> false`
+- Boolean disjunctions and conjunctions: `true || false #=> true` `true && false #=> false`
 - Ordering: `3 < 3 #=> false`, `3 <= 3 #=> true`
 - Conditionals: `if 3 < 4 then "a" else "b" #=> a`
 - Addition and subtraction: `3 + 4 #=> 7`, `3 - 4 #=> -1`
@@ -81,6 +81,7 @@ Some common operators:
 - String concatenation: `"hello " + "world" #=> "hello world"`
 - String interpolation: `"hello ${"world"}" #=> "hello world"`, `"1 + 2 = ${toString (1 + 2)}" #=> "1 + 2 = 3"`
 - Attribute set unions: `{ a = 5; } // { b = 6; } #=> { a = 5; b = 6; }`
+- Let bindings: `let x = 1; y = 2; in x + y #=> 3`
 
 # About this interface
 
