@@ -5,6 +5,15 @@ language, this session will focus on putting that into practice by building and
 executing small reproducible examples. You therefore will need Nix installed, a
 terminal for interacting with it, and this git repository.
 
+## Cloning the repository
+
+You will need a copy of this repository to interact with the exercises. Clone
+it with:
+
+     git clone --depth 1 https://github.com/WEHI-ResearchComputing/BioNix-Training.git
+
+and take a look at the `day2` directory.
+
 ## Installing and configuring Nix
 
 Nix can be installed by following the instructions at

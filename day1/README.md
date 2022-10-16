@@ -86,6 +86,7 @@ Some common operators:
 # About this interface
 
 This workshop uses [A tour of nix](https://github.com/nixcloud/tour_of_nix) with
-some altered content for the purposes of learning enough of Nix the language to
-write workflows in BioNix during the second part. Click next to continue to the
-exercises.
+altered content for the purposes of learning enough of Nix the language to write
+workflows in BioNix during the second part.
+
+[Continue on to the exercises](exercises/).
