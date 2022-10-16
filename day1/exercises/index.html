@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" >
+<head>
+  <meta name="http-equiv" content="Content-type: text/html; charset=UTF-8"/>
+  <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
+
+  <!--[if IE]>
+  <meta HTTP-EQUIV="REFRESH" content="0; url=https://www.mozilla.org/en-US/firefox/new/">
+  <![endif]-->
+
+  <!--
+  -->
+  <script type="text/javascript" src="nix-instantiate.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="text/javascript" src="FileSaver.min.js"></script>
+  <title>Day 1 - BioNix WEHI Workshop</title>
+
+  <link rel="stylesheet" href="codemirror-5.5/lib/codemirror.css">
+  <link rel="stylesheet" href="style.css" type="text/css"/>
+  <link id ="styleMobile" rel="stylesheet" href="style_mobile.css" type="text/css"/>
+  <link rel="stylesheet" href="font/font.css" type="text/css"/>
+  <script type="text/javascript" src="codemirror-5.5/lib/codemirror.js"></script>
+  <script type="text/javascript" src="codemirror-5.5/mode/shell/shell.js"></script>
+
+  <script type="text/javascript" charset="utf-8">
+
+// global variables
+var initialized = 0;
+var selected_question = 0;
+var questions;
+var current_question = 0;
+var editingQuestionText = false;
+
+// export current question object to questions.json
+var saveQuestions = function() {
+  // http://stackoverflow.com/questions/7486085/copying-array-by-value-in-javascript
+  var t = JSON.parse(JSON.stringify(questions));
+
+  for (i = 0; i < t.length; i++) {
+    t[i].code = t[i].mycode;
+    t[i].solution = t[i].mysolution;
+    delete t[i].mycode;
+    delete t[i].mysolution;
+    delete t[i].result;
+    delete t[i].resultColor;
+  }
+
+  // hack: might not have been synced yet (click next and prev for example, to do so)
+  t[selected_question].solution = document.getElementById("solution").value;
+  t[selected_question].code = editor.getValue();
+
+  var questionsJSON = JSON.stringify(t, null, 4)
+  var blob = new Blob([questionsJSON], {type: "text/plain;"});
+
+  saveAs(blob, "questions.json");
+}
+
+// on import, create a copy of code into mycode so we can use the 'reset' button
+var prepare_data = function () {
+  for(i = 0; i < questions.length; i++) {
+    questions[i].mycode = questions[i].code;
+    questions[i].mysolution = questions[i].solution;
+  }
+}
+
+// hack to make the textarea resize to the exact size needed to view all the data and not more
+var auto_resize = function (e) {
+  e.style.height = 'auto';
+  e.style.height = e.scrollHeight + 2 +'px';
+}
+
+// parses the id=23 from the url
+function getURLParameter(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+}
+function load_wanted_page() {
+  var i = parseInt(getURLParameter("id"))
+    //console.log("parser of getURLParameter found: " + getURLParameter("id"))
+    //console.log("parser of getURLParameter found: " + i)
+    if (!isNaN(i)) {
+      change_question(i-1)
+    } else {
+      change_question(0)
+    }
+}
+//loads the questions.json from the webpage
+function loadJSON(path, success, error) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function()
+  {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        if (success)
+          success(JSON.parse(xhr.responseText));
+      } else {
+        if (error)
+          error(xhr);
+      }
+    }
+  };
+  xhr.open("GET", path, true);
+  xhr.send();
+}
+loadJSON('questions.json',
+  function(data) { /*console.log(data);*/ questions = data; prepare_data(); load_wanted_page();},
+  function(xhr) { console.error(xhr); }
+);
+
+// shortcuts
+var keys = [];
+function keysPressed(e) {
+  keys[e.keyCode] = true;
+  if (keys[16] && keys[13]) { // shift+return
+    runNix()
+      e.preventDefault();
+  }
+  if (keys[17] && keys[74]) { // ctrl+ k
+    console.log("change_question(1);");
+    change_question(1);
+    e.preventDefault();
+  }
+  if (keys[17] && keys[75]) { // ctrl+.j
+    console.log("change_question(-1);");
+    change_question(-1);
+    e.preventDefault();
+  }
+  if (keys[17] && keys[190]) { // ctrl+.
+    markdown2html();
+    e.preventDefault();
+  }
+  if (keys[17] && keys[188]) { // ctrl+,
+    load_markdown();
+    e.preventDefault();
+  }
+  if (keys[17] && keys[73]) { // ctrl+i
+    resetQuestion();
+    e.preventDefault();
+  }
+  if (keys[17] && keys[83]) { // ctrl+i
+    saveQuestions();
+    e.preventDefault();
+  }
+}
+function keysReleased(e) {
+  // mark keys that were released
+  keys[e.keyCode] = false;
+}
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
+
+// implement browser forward and back button actions
+window.addEventListener("popstate", function(e) {
+  var id = getURLParameter("id");
+  var diff = id - current_question - 1;
+  change_question_withoutHistoryChange(diff);
+});
+
+// update current question and modify the window.history
+var change_question = function(myinput) {
+  change_question_withoutHistoryChange(myinput);
+  window.history.pushState('', '',  window.location.pathname + '?id=' + (current_question + 1));
+}
+
+// update current question and NOT modifying the window.history
+var change_question_withoutHistoryChange = function (myinput) {
+  // save old state
+  if (editingQuestionText == true)
+    alert("editor must be closed before opening a different question, now everything is corrupted -> reload and start over. sorry (qknight)")
+  var output = document.getElementById('output');
+
+  // prevent overwriting with 'empty data' on the first page load
+  if (initialized) {
+    questions[current_question].mycode = editor.getValue();
+    questions[current_question].mysolution = document.getElementById('solution').value;
+    questions[current_question].result = output.value;
+    questions[current_question].resultColor = output.style.backgroundColor;
+    auto_resize(output)
+  }
+
+  initialized=1;
+  current_question += myinput;
+  output.style.backgroundColor = "grey";
+
+  if (current_question < 0)
+    current_question = 0;
+  if (current_question >= questions.length-1)
+    current_question = questions.length-1;
+
+  var contentTitle = document.getElementById('contentTitle');
+  var contentText = document.getElementById('contentText');
+  var contentSolution = document.getElementById('solution');
+
+  var topic = questions[current_question].topic;
+  var question = questions[current_question].question;
+  var mycode = questions[current_question].mycode;
+  var mysolution = questions[current_question].mysolution;
+  contentSolution.style.display="none";
+
+  contentTitle.innerHTML = String(current_question + 1 + "<font size=\"3%\"> / " + questions.length + "</font>" + " - " + topic);
+
+  var paypal='<p><form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top"> <input type="hidden" name="cmd" value="_donations"> <input type="hidden" name="business" value="js@lastlog.de"> <input type="hidden" name="lc" value="DE"> <input type="hidden" name="item_name" value="Help Paul and Joachim in making a tour of nix better!"> <input type="hidden" name="no_note" value="0"> <input type="hidden" name="currency_code" value="EUR"> <input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_SM.gif:NonHostedGuest"> <input type="image" src="paypal.gif" border="0" name="submit" alt="Jetzt einfach, schnell und sicher online bezahlen – mit PayPal."> </form></p>'
+  var text = marked.parse(question);
+  contentText.innerHTML = text.replace("??PAYPAL??", paypal);
+
+    var links = document.links;
+
+   for (var i = 0, linksLength = links.length; i < linksLength; i++) { //>
+     if (links[i].hostname != window.location.hostname) {
+       links[i].target = '_blank';
+     }
+   }
+
+
+
+  contentSolution.value = mysolution;
+  auto_resize(contentSolution);
+  editor.setValue(mycode);
+  if (typeof(questions[current_question].result) !== "undefined")
+    output.value = questions[current_question].result;
+  else
+    output.value = "";
+
+  if (typeof(questions[current_question].resultColor) !== "undefined")
+    output.style.backgroundColor = questions[current_question].resultColor;
+
+  auto_resize(output);
+  auto_resize(contentSolution);
+  selected_question = current_question;
+};
+
+// force the two-paned layout even though horizontal space is 'actually' too little
+flipStylesheet = function() {
+    document.getElementById("styleMobile").disabled = !document.getElementById("styleMobile").disabled;
+  }
+
+var showSolution = function() {
+  var s = document.getElementById('solution');
+
+  if (s.style.display == "none") {
+    s.style.display = "flex";
+    auto_resize(s);
+  } else {
+    s.style.display = "none";
+  }
+}
+var resetQuestion = function() {
+  editor.setValue(questions[selected_question].code);
+  var s = document.getElementById('solution');
+  s.value = questions[selected_question].solution;
+
+  var output = document.getElementById('output');
+  output.style.backgroundColor = "grey";
+  console.log("reset question")
+}
+// embedded 'Questions' editor using the 'editor'
+//   generate preview & close
+var markdown2html = function() {
+  var contentText = document.getElementById('contentText');
+
+  if (editingQuestionText == true) {
+    var text = editor.getValue();
+    if (text == questions[selected_question].question) {
+      // qutting the editor
+      editor.setValue(questions[selected_question].mycode);
+      editingQuestionText = false;
+    } else {
+// console.log("6.1")
+      // changes were detected, so we just update the preview
+      var p = marked.parse(text);
+// console.log("6.2")
+      contentText.innerHTML = p;
+// console.log("6.3")
+      delete p;
+      questions[selected_question].question = text;
+    }
+  }
+}
+// embedded 'Questions' editor using the 'editor'
+//   open the editor
+var load_markdown = function() {
+  if (editingQuestionText == false) {
+    editingQuestionText = true;
+    questions[current_question].mycode = editor.getValue();
+    var text = questions[current_question].question;
+    editor.setValue(text.split('\\n').join('\n').replace("\\\"", "\""))
+  }
+}
+
+Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
+
+// primary routine to execute the code from the editor in nix-instantiate
+var runNix = function() {
+  var start = new Date().getTime();
+//  Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
+
+  // run the solution
+
+  var correct_solution;
+
+  Module['print'] = function(text) {
+//    Module['return'] = text + '\n';
+    correct_solution = text;
+    var end = new Date().getTime();
+    var time = end - start;
+    console.log('Execution time: ' + time + ' ms');
+
+  };
+  Module['printErr'] = function(text) {
+  //this should not happen
+  //TODO exception handling
+  };
+  var solution_text = questions[current_question].solution;
+  FS.writeFile('/test.nix', solution_text, {encoding: 'utf8'});
+  //var result = FS.readFile('test.nix', {encoding: 'utf8'});
+  //console.log(result);
+//  Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
+  Module.callMain(Module['arguments']);
+
+  //run the user input
+  console.log("running runNix()");
+  document.getElementById('runInfo').innerHTML = "computation in progress";
+  document.getElementById('output').value = "";
+  Module['print'] = function(text) {
+//    Module['return'] = text + '\n';
+    var o = document.getElementById('output');
+    if (text == correct_solution){
+      console.log("correct answer");
+      o.value = text;
+      o.style.backgroundColor = "#44aa44";
+  //    setTimeout(function () {o.style.backgroundColor = "grey"}, 2000);
+    }else{
+      console.log("incorrect answer");
+      o.value = "your solution:\n" + text + "\nexpected was:\n" + correct_solution;
+      o.style.backgroundColor = "#aa4444";
+  //    setTimeout(function () {o.style.backgroundColor = "grey"}, 2000);
+    }
+    auto_resize(o);
+    document.getElementById('runInfo').innerHTML = "";
+
+  };
+  Module['printErr'] = function(text) {
+    text = text.replace("[31;1m", "");
+    text = text.replace("[1m", "");
+    text = text.replace("[1m", "");
+    text = text.replace("[0m","");
+    text = text.replace("[0m","");
+    text = text.replace("/test.nix","line");
+    text = text.replace("/test.nix","line");
+    text = text.replace("/test.nix","line");
+    text = text.replace("/test.nix","line");
+    text = text.replace(//g, "");
+//    text = text.replace(":error:", ":\nerror");
+    console.log(text);
+//    Module['return'] = text + '\n';
+    document.getElementById('runInfo').innerHTML = "";
+    var o = document.getElementById('output')
+    o.value += text +"\n";
+    auto_resize(o)
+
+    console.log("incorrect answer");
+//    o.value += text;
+    o.style.backgroundColor = "#aa4444";
+//    setTimeout(function () {o.style.backgroundColor = "grey"}, 2000);
+  };
+  var input_text = editor.getValue();
+  FS.writeFile('/test.nix', input_text, {encoding: 'utf8'});
+//  Module['arguments'] = ['-I', 'nixpkgs=nixpkgs', '--eval', '--strict', '--show-trace', '/test.nix'];
+  //var result = FS.readFile('test.nix', {encoding: 'utf8'});
+  //console.log(result);
+  Module.callMain(Module['arguments']);
+};
+
+  </script>
+</head>
+<body>
+  <div id="spinner" class="spinner-flex-container-row">
+    <div class="spinner-flex-container-col">
+      <div id="spinner-icon"><img src="nix.gif"></div>
+      <div id="status">Downloading...</div>
+      <progress value="0" max="100" id="progress" hidden=1>progress</progress>
+    </div>
+  </div>
+  <div class="flex-container-col">
+    <div id="header_container" class="flex-container-row">
+      <div id="header"><h1>Day 1 - BioNix WEHI Workshop</h1></div>
+      <div id="rotate" onclick="flipStylesheet()"></div>
+    </div>
+    <div id="middle" class="flex-container-row">
+      <div id="left" class="flex-container-col">
+        <div id="adsfas" class="flex-container-col">
+          <textarea class="input" id="input" rows="8">demo text textarea</textarea>
+          <div id="editorButtonGroup"  class="flex-container-row">
+            <button type="button" class="myButton" id="resetButton" onClick="resetQuestion()" title="">reset</button>
+            <button type="button" class="myButton" id="solutionButton" onClick="showSolution()" title="">solution</button>
+            <button type="button" class="myButton" id="runButton" onClick="runNix()" title="use shift+return">run</button>
+          </div>
+        </div>
+        <textarea id="output" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <textarea id="solution" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div id="runInfo"></div>
+      </div>
+      <div id="right" class="flex-container-col">
+        <div id="questionNavigation" class="flex-container-row">
+          <button type="button" class="myButton" id="prevButton" title="use ctrl+k" onClick="change_question(-1)" >prev</button>
+          <button type="button" class="myButton" id="nextButton" title="use ctrl+j" onClick="change_question(1)" >next</button>
+        </div>
+        <h1><div id="contentTitle">Day 1 - BioNix WEHI workshop_</div></h1>
+        <div id="contentText">If you can see this, <b>questions.json</b> wasn't loaded properly!<br><br>
+          Javascript execution: <b><div id="testJS">failed, are you blocking JS execution? This webpage won't work without JS!</div></b>.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="footerFG"> </div>
+  <div id="footerBG"><img src="footerBG.jpg" width="100%" height="100%"/></div>
+  <script type="text/javascript">
+    var input = document.getElementById('input');
+    var editor = CodeMirror.fromTextArea(input, {
+      lineNumbers: true,
+      viewportMargin: Infinity,
+    });
+    document.getElementById('testJS').innerHTML = "works! Maybe wait a little longer as this webpage is rather big with 27Mib!";
+
+ </script>
+</body>
+</html>
