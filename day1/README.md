@@ -15,7 +15,7 @@ installed over the past year? Do you think your analysis today will be the same
 in one years time if your software stack has changed?
 
 One way to deal with this problem is to make computations *pure* by forbidding
-the use of anything that is not explicitly stated as an input. This is the same
+the use of anything that is not explicitly declared as an input. This is the same
 idea of pure functional programming, only at the higher level of executing
 software.
 
@@ -90,7 +90,21 @@ Some common operators:
 - Attribute set unions: `{ a = 5; } // { b = 6; }` ⇒ `{ a = 5; b = 6; }`
 - Let bindings: `let x = 1; y = 2; in x + y` ⇒ `3`
 
-# About this interface
+## Where to get help
+
+A very helpful 1 page cheat sheet for Nix the language is
+[here](https://github.com/tazjin/nix-1p). The official Nix/nixpkgs
+documentations are available [on the main website](https://nixos.org/learn.html).
+
+There are several Matrix chat rooms for support. For general Nix or nixpkgs
+questions use the [#nix:nixos.org](https://matrix.to/#/#nix:nixos.org) room. For
+BioNix specific questions there's
+[#bionix:nixos.org](https://matrix.to/#/#bionix:nixos.org).
+
+Finally there's a [discourse forum](https://discourse.nixos.org/) available for
+Nix/nixpkgs questions.
+
+# Exercises
 
 This workshop uses [A tour of nix](https://github.com/nixcloud/tour_of_nix) with
 altered content for the purposes of learning enough of Nix the language to write

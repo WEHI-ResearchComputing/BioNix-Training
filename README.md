@@ -6,3 +6,6 @@ covering the particular day. Read those for further details.
 
 - [Day 1](./day1): Learning the Nix language
 - [Day 2](./day2): Specifying and building pipelines
+
+The repository for these materials are hosted on
+[github](https://github.com/WEHI-ResearchComputing/BioNix-Training).
