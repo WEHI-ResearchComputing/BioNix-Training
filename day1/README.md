@@ -68,20 +68,20 @@ the basic data types and their syntax:
 - Attribute sets: `{ a = 5; b = "something else"; }`
 - Comments: `# this is a comment`
 - Functions: `x: x + 1`
-- Variable binding: `let x = 5; in x #=> 5`
-- Function application: `let f = x: x + 1; in f 5 #=> 6`
+- Variable binding: `let x = 5; in x` ⇒ `5`
+- Function application: `let f = x: x + 1; in f 5` ⇒ `6`
 - File paths: `/path/to/file`
 
 Some common operators:
-- Boolean disjunctions and conjunctions: `true || false #=> true` `true && false #=> false`
-- Ordering: `3 < 3 #=> false`, `3 <= 3 #=> true`
-- Conditionals: `if 3 < 4 then "a" else "b" #=> a`
-- Addition and subtraction: `3 + 4 #=> 7`, `3 - 4 #=> -1`
-- Multiplication and division: `3 * 4 #=> 12`, `3.0 / 4 #=> 0.75`
-- String concatenation: `"hello " + "world" #=> "hello world"`
-- String interpolation: `"hello ${"world"}" #=> "hello world"`, `"1 + 2 = ${toString (1 + 2)}" #=> "1 + 2 = 3"`
-- Attribute set unions: `{ a = 5; } // { b = 6; } #=> { a = 5; b = 6; }`
-- Let bindings: `let x = 1; y = 2; in x + y #=> 3`
+- Boolean disjunctions and conjunctions: `true || false` ⇒ `true`, `true && false` ⇒ `false`
+- Ordering: `3 < 3` ⇒ `false`, `3 <= 3` ⇒ `true`
+- Conditionals: `if 3 < 4 then "a" else "b"` ⇒ `a`
+- Addition and subtraction: `3 + 4` ⇒ `7`, `3 - 4` ⇒ `-1`
+- Multiplication and division: `3 * 4` ⇒ `12`, `3.0 / 4` ⇒ `0.75`
+- String concatenation: `"hello " + "world"` ⇒ `"hello world"`
+- String interpolation: `"hello ${"world"}"` ⇒ `"hello world"`, `"1 + 2 = ${toString (1 + 2)}"` ⇒ `"1 + 2 = 3"`
+- Attribute set unions: `{ a = 5; } // { b = 6; }` ⇒ `{ a = 5; b = 6; }`
+- Let bindings: `let x = 1; y = 2; in x + y` ⇒ `3`
 
 # About this interface
 
