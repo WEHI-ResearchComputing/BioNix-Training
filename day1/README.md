@@ -62,7 +62,14 @@ available data types but has one very important addition: functions. Let's cover
 the basic data types and their syntax:
 
 - Booleans: `true` and `false`
-- Strings: `"this is a string"`
+- Strings: `"this is a string"`, can be multiline:
+```
+''
+this is a
+multiline
+string
+''
+```
 - Numbers: `0`, `1.234`
 - Lists: `[ 0 1.234 "string" ]`
 - Attribute sets: `{ a = 5; b = "something else"; }`
