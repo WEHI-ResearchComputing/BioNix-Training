@@ -86,11 +86,58 @@ solution.
 ## Flakes and hermetic sealing
 
 These exercises use an extension to Nix called *flakes*, which allow for
-hermetically sealing all the input requirements such as *nixpkgs* and *BioNix*.
+hermetically sealing all the input requirements such as *nixpkgs* and *bionix*.
 How this works is beyond the scope of this workshop, however you can take a look
 at one of the `flake.nix` to see how inputs are defined followed by outputs (our
 workshop exercises) based on the inputs. The `flake.lock` is automatically
 created by Nix and pins the versions of all the inputs precisely.
+
+## BioNix and how it is structured
+
+Bionix is organised into a tree of functions with two levels, the first being
+the tool and the second being the action to take with that tool. An example is
+using the BWA aligner to align some sequences against a reference genome: the
+function is named `bionix.bwa.align`. This convention allows different tools to
+be swapped with minimal changes, for example using bowtie2 instead of BWA for
+alignment would mean just using the function `bionix.bowtie2.align` instead.
+
+These functions are structed to take two parameters, the first is configuration
+for the tool and the second is the input. Continuing our example of BWA, the
+first argument specifies the reference (configuration) and the second the
+sequences to align: `bionix.bwa.align { ref = ...; } { input1 = ...; input2 =
+...; }`. Separating out the config like this allows us to write pipelines by
+function composition, e.g., to align and then sort the output one could do:
+
+    bionix.samtools.sort { /* config for sort */ } (bionix.bwa.align { ref = ...; } { input1 = ...; input2 = ...; })
+
+or, taking advantage of the handy library function `pipe`:
+
+    bionix.lib.pipe {input1 = ...; input2 = ...; } [
+      (bionix.bwa.align { ref = ...;})
+      (samtools.sort {})
+    ]
+
+NB: list elements are separated by space, but function application is also
+separated by space! Make sure to parenthesise your function compositions, as
+above, in lists.
+
+The best way to see what's available is to just [browse the
+repository](https://github.com/PapenfussLab/bionix/tree/master/tools). You can
+always write your own *stages*, or concrete processing steps. This is just a
+function in the top-level bionix tree, e.g.,:
+
+    bionix.stage {
+      name = "my-stage";
+      buildInputs = [];
+      buildCommand = ''
+      '';
+    }
+
+Stages have to have a name and a `buildCommand`, which is a shell script
+(executed with bash) that does the computation and writes output to the path
+given by the environment variable `$out`. `buildInputs` is a list of required
+software for the `buildCommand`. The exercises in this part of the workshop
+focus on showing how different type of stages can be constructed.
 
 ## Where to get help
 
