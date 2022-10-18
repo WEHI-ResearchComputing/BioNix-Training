@@ -100,6 +100,8 @@ There are several Matrix chat rooms for support. For general Nix or nixpkgs
 questions use the [#nix:nixos.org](https://matrix.to/#/#nix:nixos.org) room. For
 BioNix specific questions there's
 [#bionix:nixos.org](https://matrix.to/#/#bionix:nixos.org).
+The [Nix community Matrix space](https://matrix.to/#/#community:nixos.org) is
+good to join to see what topic specific rooms are available.
 
 Finally there's a [discourse forum](https://discourse.nixos.org/) available for
 Nix/nixpkgs questions.
