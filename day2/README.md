@@ -81,7 +81,8 @@ with
     nix build .#solution
 
 however you should try to solve the problem yourself before looking at the
-solution.
+solution. A successful build will create a symlink called `./result` by default
+to the result of the build.
 
 ## Flakes and hermetic sealing
 
