@@ -49,12 +49,12 @@ in
 
     src = pkgs.fetchurl {
       url = "http://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz";
-      sha256 = "sha256-hH1uvZoeyado8r5+QMpCy/516+ttdqTCQWcEFpncKLU=";
+      sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
 
     notebook = pkgs.fetchurl {
       url = "https://github.com/scverse/scanpy-tutorials/raw/532f755ac31d9baf00116a44243b73174765a6a6/pbmc3k.ipynb";
-      sha256 = "sha256-mwIPHKAsDd1F4F9fNnAfrapBehBN3jjEsrLGsI37Igg=";
+      sha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
 
     buildCommand = ''
