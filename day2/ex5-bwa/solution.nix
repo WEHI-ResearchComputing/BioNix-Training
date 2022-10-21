@@ -16,4 +16,4 @@ with bionix; let
     sha256 = "sha256-V3zqOJFuGtukDRQttK/pGfKofgOlKrridHaWYhGGyWs=";
   };
 in
-  samtools.sort {} (bwa.align {inherit ref;} input)
+  samtools.sort {} (minimap2.align {preset = "sr"; inherit ref;} input)
