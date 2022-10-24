@@ -49,4 +49,8 @@ with bionix; let
     url = "https://raw.githubusercontent.com/PapenfussLab/bionix/bac9248a5e08e8afdf5485a6e27cfe72e1ca5090/examples/ref.fa";
   };
 in
+  # if on an ARM (M1/2) mac BWA will be unavailable!
   bwa.align {} input
+# use this instead on aarch64
+#minimap2.align {preset = "sr";}
+
